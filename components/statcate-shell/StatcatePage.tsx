@@ -26,20 +26,20 @@ type Props = {
 
 const PLACEHOLDER: Record<Exclude<ShellTab, "indicator">, { mn: string; en: string }> = {
   table: {
-    mn: "Хүснэгт таб 1212.mn дээр ажиллана. Энэ төсөлд зөвхөн Танилцуулга dashboard хөгжүүлнэ.",
-    en: "The Table tab lives on 1212.mn. This project is only for Presentation dashboards.",
+    mn: "Хүснэгт",
+    en: "Table",
   },
   report: {
-    mn: "Тайлан таб 1212.mn дээр ажиллана.",
-    en: "The Report tab lives on 1212.mn.",
+    mn: "Тайлан",
+    en: "Report",
   },
   methodology: {
-    mn: "Аргачлал таб 1212.mn дээр ажиллана.",
-    en: "The Methodology tab lives on 1212.mn.",
+    mn: "Аргачлал",
+    en: "Methodology",
   },
   qualityreport: {
-    mn: "Чанарын тайлан таб 1212.mn дээр ажиллана.",
-    en: "The Quality Report tab lives on 1212.mn.",
+    mn: "Чанар",
+    en: "Quality",
   },
 };
 
