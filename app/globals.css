@@ -1,0 +1,18 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #fff;
+  color: #222;
+  font-family: "sf-pro-text", roboto, system-ui, sans-serif;
+}
+
+.sector-intro-loading {
+  padding: 2rem 0;
+  color: #5b6b80;
+}
