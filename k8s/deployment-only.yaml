@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 1212-dashboard-deployment
+  namespace: 1212-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: 1212-dashboard
+  template:
+    metadata:
+      labels:
+        app: 1212-dashboard
+    spec:
+      imagePullSecrets:
+        - name: gitlab-secret
+      containers:
+        - name: 1212-dashboard
+          image: gitlab.nso.mn:5050/enebish/1212-dashboard:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000

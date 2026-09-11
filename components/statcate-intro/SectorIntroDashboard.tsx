@@ -5,6 +5,7 @@ import WidgetList from "@/components/statcate-intro/WidgetList";
 import { useIntroDashboard } from "@/components/statcate-intro/useIntroDashboard";
 import { COPY } from "@/lib/statcate-intro/constants";
 import { loc } from "@/lib/statcate-intro/format";
+import { formatPeriodAxis } from "@/lib/statcate-intro/query";
 import "./intro.scss";
 
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
 
 export default function SectorIntroDashboard({ lng, sector, subsector }: Props) {
   const dash = useIntroDashboard({ lng, sector, subsector });
-  const { config, loading, error, year, setYear, years } = dash;
+  const { config, loading, error, year, setYear, years, monthly } = dash;
 
   if (!config) return null;
 
@@ -44,11 +45,11 @@ export default function SectorIntroDashboard({ lng, sector, subsector }: Props) 
           </h3>
         </div>
         <label className="sector-intro-year">
-          <span>{loc(lng, COPY.year)}</span>
+          <span>{loc(lng, monthly ? COPY.month : COPY.year)}</span>
           <select value={year} onChange={(event) => setYear(event.target.value)}>
             {years.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {monthly ? formatPeriodAxis(item) : item}
               </option>
             ))}
           </select>

@@ -39,7 +39,7 @@ export const socialInsurance: IntroDashboardConfig = {
       id: "avgPension",
       file: "DT_NSO_2025_03.px",
       label: { mn: "Сарын дундаж тэтгэвэр", en: "Average monthly pension" },
-      unit: { mn: "мян.төг / сар", en: "thousand MNT / month" },
+      unit: { mn: "мян. ₮ / сар", en: "thousand ₮ / month" },
       icon: "avgPension",
       format: "decimal",
       select: { Төрөл: ["7"] },
@@ -76,14 +76,7 @@ export const socialInsurance: IntroDashboardConfig = {
     {
       type: "region-map",
       table: "pensioners",
-      layout: {
-        legend: "horizontal",
-        aspectScale: 1.08,
-        left: 8,
-        right: 8,
-        top: 16,
-        bottom: 48,
-      },
+      layout: { legend: "horizontal" },
     },
   ],
 };

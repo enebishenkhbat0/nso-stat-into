@@ -137,6 +137,7 @@ export const SHELL_SECTORS: ShellSector[] = [
   ]),
 ];
 
+/** 1212.mn statcate tabs — зөвхөн танилцуулга ажиллана. */
 export const SHELL_TABS: { id: ShellTab; mn: string; en: string }[] = [
   { id: "table", mn: "Хүснэгт", en: "Table" },
   { id: "indicator", mn: "Танилцуулга", en: "Introduction" },
@@ -146,7 +147,7 @@ export const SHELL_TABS: { id: ShellTab; mn: string; en: string }[] = [
 ];
 
 export const DEFAULT_SECTOR = "Society, development";
-export const DEFAULT_SUBSECTOR = "Sustainable Development Goals";
+export const DEFAULT_SUBSECTOR = "Monasteries, Temples and Churches";
 
 export function loc(lng: string, item: { mn: string; en: string }) {
   return lng === "en" ? item.en : item.mn;

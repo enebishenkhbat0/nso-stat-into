@@ -5,11 +5,15 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
-    "start": "next start"
+    "start": "next start",
+    "image:build": "docker build -f dockerfile -t gitlab.nso.mn:5050/enebish/1212-dashboard:latest .",
+    "image:push": "docker push gitlab.nso.mn:5050/enebish/1212-dashboard:latest",
+    "image:all": "npm run image:build && npm run image:push"
   },
   "dependencies": {
     "echarts": "^5.5.1",
     "echarts-for-react": "^3.0.2",
+    "lucide-react": "^1.44.0",
     "next": "^16.2.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

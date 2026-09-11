@@ -24,25 +24,6 @@ type Props = {
   subsector: string;
 };
 
-const PLACEHOLDER: Record<Exclude<ShellTab, "indicator">, { mn: string; en: string }> = {
-  table: {
-    mn: "Хүснэгт",
-    en: "Table",
-  },
-  report: {
-    mn: "Тайлан",
-    en: "Report",
-  },
-  methodology: {
-    mn: "Аргачлал",
-    en: "Methodology",
-  },
-  qualityreport: {
-    mn: "Чанар",
-    en: "Quality",
-  },
-};
-
 function isTab(value: string): value is ShellTab {
   return SHELL_TABS.some((item) => item.id === value);
 }
@@ -104,7 +85,7 @@ export default function StatcatePage({ lng, tab, sector, subsector }: Props) {
                     {item.children.map((child) => (
                       <Link
                         key={child.id}
-                        href={statcateHref(lng, "indicator", item.id, child.id)}
+                        href={statcateHref(lng, activeTab, item.id, child.id)}
                         className={item.id === sectorId && child.id === subsectorId ? "is-active" : ""}
                       >
                         {loc(lng, child)}
@@ -119,12 +100,13 @@ export default function StatcatePage({ lng, tab, sector, subsector }: Props) {
 
         <main className="nso-shell-main">
           <h1 className="nso-shell-title">{title}</h1>
+
           <nav className="nso-shell-tabs">
             {SHELL_TABS.map((item) => (
               <Link
                 key={item.id}
                 href={statcateHref(lng, item.id, sectorId, subsectorId)}
-                className={item.id === activeTab ? "is-active" : ""}
+                className={item.id === activeTab ? "is-active" : undefined}
               >
                 {loc(lng, item)}
               </Link>
@@ -136,15 +118,12 @@ export default function StatcatePage({ lng, tab, sector, subsector }: Props) {
               <SectorIntroDashboard lng={lng} sector={sectorId} subsector={subsectorId} />
             ) : (
               <div className="nso-shell-placeholder">
-                <strong>{title}</strong>
-                {lng === "en"
-                  ? "No intro dashboard is wired for this menu item yet. Add a config under lib/statcate-intro/configs."
-                  : "Энэ цэсний танилцуулга dashboard хараахан холбогдоогүй. lib/statcate-intro/configs дотор config нэмнэ."}
+                {lng === "en" ? "Not implemented yet." : "Хийгдээгүй байна."}
               </div>
             )
           ) : (
             <div className="nso-shell-placeholder">
-              {loc(lng, PLACEHOLDER[activeTab])}
+              {lng === "en" ? "Not implemented yet." : "Хийгдээгүй байна."}
             </div>
           )}
         </main>

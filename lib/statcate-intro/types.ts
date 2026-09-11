@@ -8,6 +8,9 @@ export type PxRow = Record<string, string | number | null>;
 export type IntroIconName =
   | "temple"
   | "people"
+  | "representatives"
+  | "male"
+  | "female"
   | "book"
   | "dharma"
   | "church"
@@ -22,7 +25,54 @@ export type IntroIconName =
   | "welfare"
   | "sdg"
   | "child"
-  | "elder";
+  | "elder"
+  | "male"
+  | "female"
+  | "bop"
+  | "cpi"
+  | "environment"
+  | "energy"
+  | "trade"
+  | "budget"
+  | "investment"
+  | "money"
+  | "gdp"
+  | "ppi"
+  | "productivity"
+  | "fx"
+  | "forest"
+  | "goods"
+  | "services"
+  | "reserves"
+  | "food"
+  | "meat"
+  | "milk"
+  | "potato"
+  | "vegetables"
+  | "housing"
+  | "housingNew"
+  | "housingOld"
+  | "housingPrice"
+  | "calendar"
+  | "ag"
+  | "fire"
+  | "damage"
+  | "protection"
+  | "tax"
+  | "export"
+  | "import"
+  | "balance"
+  | "expense"
+  | "domestic"
+  | "foreign"
+  | "fdi"
+  | "loans"
+  | "npl"
+  | "growth"
+  | "capita"
+  | "mining"
+  | "manufacturing"
+  | "utilities";
 
 export type IntroValueFormat = "count" | "percent" | "decimal" | "currency";
 
@@ -31,9 +81,12 @@ export type IntroTableConfig = {
   id: string;
   file: string;
   /** Нэмэлт PX файлууд — мөрийг нэгтгэнэ (ж: 1995–2020 + 2022). */
-  files?: string[];
+  files?: (string | { file: string; select: Record<string, string[]> })[];
   /** PX дэд хавтас, ж: "INEQUALITY, Gini index, Theil index" */
   subtables?: string;
+  /** Өөр салбар/дэд салбараас татах (ж: ТХЗ → ядуурлын хүснэгт). */
+  sourceSector?: string;
+  sourceSubsector?: string;
   label: LocalizedText;
   icon?: IntroIconName;
   unit?: LocalizedText;
@@ -44,6 +97,8 @@ export type IntroTableConfig = {
   nationalMode?: "code" | "average";
   /** PX dimension code -> value codes. Өгөөгүй бол бүх утгыг авна. */
   select?: Record<string, string[]>;
+  /** Энэ хүснэгтийн цаг хугацааны хэмжээс. Өгөөгүй бол config.dimensions.time. */
+  time?: string;
 };
 
 export type IntroDimensions = {
@@ -83,6 +138,7 @@ export type TrendWidget = {
   type: "trend";
   span?: IntroWidgetSpan;
   tables?: string[];
+  title?: LocalizedText;
   /** fromZero = тоо. nice = хувь/индекс, өгөгдлийн хүрээгээр. */
   yAxis?: TrendYAxisMode;
   height?: number;
@@ -98,6 +154,7 @@ export type RegionBarsWidget = {
 };
 
 export type RegionMapLayout = {
+  fitToContainer?: boolean;
   aspectScale?: number;
   layoutCenter?: [string, string];
   layoutSize?: string;
@@ -111,6 +168,7 @@ export type RegionMapLayout = {
 
 export type RegionMapWidget = {
   type: "region-map";
+  title?: LocalizedText;
   span?: IntroWidgetSpan;
   table: string;
   layout?: RegionMapLayout;
@@ -123,16 +181,29 @@ export type CategoryStatsWidget = {
   dimension: string;
   totals?: string[];
   title?: LocalizedText;
+  labelMap?: Record<string, string>;
 };
 
 export type CategoryBarsWidget = {
   type: "category-bars";
+  /** Fixed rows shared by paired charts; absent codes retain an empty row. */
+  categories?: { code?: string; label: LocalizedText }[];
+  /** Show only the selected year when false (for one-off events such as runoffs). */
+  fallbackYear?: boolean;
+  /** Override the dashboard palette for this chart. */
+  color?: string;
+  /** Value bands: min inclusive, max exclusive; applied only to this widget. */
+  valueColorBands?: { min?: number; max?: number; color: string }[];
   span?: IntroWidgetSpan;
   table: string;
   dimension: string;
   title?: LocalizedText;
   labelMap?: Record<string, string>;
   height?: number;
+  layout?: "vertical" | "horizontal";
+  /** Абсолют утгаараа эхний N мөр. */
+  top?: number;
+  totals?: string[];
 };
 
 export type IntroWidget =
@@ -168,6 +239,7 @@ export type IntroTableData = {
   unit?: string;
   format?: IntroValueFormat;
   geo?: string;
+  time?: string;
   nationalMode?: "code" | "average";
   rows: PxRow[];
 };

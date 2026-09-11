@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: 1212-dashboard-svc
+  namespace: 1212-dashboard
+spec:
+  selector:
+    app: 1212-dashboard
+  ports:
+    - port: 80
+      targetPort: 3000

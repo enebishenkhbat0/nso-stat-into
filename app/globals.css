@@ -9,7 +9,7 @@ body {
   margin: 0;
   background: #fff;
   color: #222;
-  font-family: "sf-pro-text", roboto, system-ui, sans-serif;
+  font-family: "sf-pro-text", roboto, "Segoe UI", system-ui, sans-serif;
 }
 
 .sector-intro-loading {

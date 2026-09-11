@@ -1,11 +1,7 @@
 "use client";
 
 import { formatCount } from "@/lib/statcate-intro/format";
-import {
-  resolveCategoryClergyImage,
-  resolveCategoryIcon,
-  resolveCategoryImage,
-} from "@/lib/statcate-intro/icons";
+import { resolveCategoryIcon } from "@/lib/statcate-intro/icons";
 import { colorFor, listCategories, nationalValue } from "@/lib/statcate-intro/query";
 import type { CategoryFlowWidget } from "@/lib/statcate-intro/types";
 import type { IntroDashboardState } from "@/components/statcate-intro/useIntroDashboard";
@@ -27,66 +23,59 @@ export default function CategoryFlow({ widget, dash }: Props) {
   const items = listCategories(source.rows, config).map((label, i) => ({
     label,
     color: colorFor(label, i, widget.colors),
-    source: nationalValue(source.rows, config, year, label),
-    target: nationalValue(target.rows, config, year, label),
-    extra: extra ? nationalValue(extra.rows, config, year, label) : 0,
+    source: nationalValue(source.rows, config, year, label) ?? 0,
+    target: nationalValue(target.rows, config, year, label) ?? 0,
+    extra: extra ? (nationalValue(extra.rows, config, year, label) ?? 0) : 0,
   }));
 
   if (!items.length) return null;
 
   return (
     <section className="sector-intro-hero">
-      <div className="category-flow">
-        <div className="category-flow-col category-flow-col--left">
-          {items.map((item) => {
-            const image = resolveCategoryImage(item.label, widget.categoryIcons);
-            const Icon = resolveCategoryIcon(item.label, widget.categoryIcons);
-            return (
-              <div key={item.label} className="category-flow-node">
-                <span className="category-flow-orb">
-                  {image ? <img src={image} alt="" width={40} height={40} /> : <Icon size={20} />}
+      <div className={`category-flow${extra ? " has-extra" : ""}`}>
+        {items.map((item) => {
+          const Icon = resolveCategoryIcon(item.label, widget.categoryIcons);
+          return (
+            <div key={item.label} className="category-flow-row">
+              <div
+                className="category-flow-node"
+                style={{ ["--accent" as string]: item.color }}
+              >
+                <span className="category-flow-orb is-mark">
+                  <Icon size={18} />
                 </span>
-                <div>
+                <div className="category-flow-copy">
                   <strong>{formatCount(item.source, lng)}</strong>
                   <p>
-                    <span>{item.label}</span>
-                    <span>{source.label}</span>
+                    <span className="category-flow-name">{item.label}</span>
+                    <span className="category-flow-meta">{source.label}</span>
                   </p>
                 </div>
               </div>
-            );
-          })}
-        </div>
 
-        <div className="category-flow-col category-flow-col--right">
-          {items.map((item) => {
-            const clergy = resolveCategoryClergyImage(item.label, widget.categoryIcons);
-            const Icon = resolveCategoryIcon(item.label, widget.categoryIcons);
-            return (
               <article
-                key={item.label}
                 className="category-flow-card"
                 style={{ ["--accent" as string]: item.color }}
               >
-                <span className="category-flow-card-icon">
-                  {clergy ? <img src={clergy} alt="" width={40} height={40} /> : <Icon size={20} />}
+                <span className="category-flow-card-icon is-mark">
+                  <Icon size={18} />
                 </span>
-                <div>
-                  <p>
+                <div className="category-flow-metrics">
+                  <div className="category-flow-metric">
                     <b>{formatCount(item.target, lng)}</b>
                     <span>{target.label}</span>
-                  </p>
+                  </div>
                   {extra ? (
-                    <p>
+                    <div className="category-flow-metric">
                       <b>{formatCount(item.extra, lng)}</b>
                       <span>{extra.label}</span>
-                    </p>
+                    </div>
                   ) : null}
                 </div>
               </article>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

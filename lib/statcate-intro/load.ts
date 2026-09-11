@@ -9,8 +9,10 @@ async function loadFile(
   table: IntroTableConfig,
   file: string,
 ): Promise<PxRow[]> {
-  const meta = await fetchPxMetadata(lng, sector, subsector, file, table.subtables);
-  return fetchPxRows(lng, sector, subsector, file, meta, table.select, table.subtables);
+  const fromSector = table.sourceSector ?? sector;
+  const fromSubsector = table.sourceSubsector ?? subsector;
+  const meta = await fetchPxMetadata(lng, fromSector, fromSubsector, file, table.subtables);
+  return fetchPxRows(lng, fromSector, fromSubsector, file, meta, table.select, table.subtables);
 }
 
 export async function loadIntroTables(
@@ -22,7 +24,12 @@ export async function loadIntroTables(
   return Promise.all(
     config.tables.map(async (table) => {
       const files = [table.file, ...(table.files ?? [])];
-      const packs = await Promise.all(files.map((file) => loadFile(lng, sector, subsector, table, file)));
+      const packs = await Promise.all(files.map((source) => {
+        // Historical files may encode the same indicator with different dimensions.
+        const file = typeof source === "string" ? source : source.file;
+        const sourceTable = typeof source === "string" ? table : { ...table, select: source.select };
+        return loadFile(lng, sector, subsector, sourceTable, file);
+      }));
       return {
         id: table.id,
         label: loc(lng, table.label),
@@ -30,6 +37,7 @@ export async function loadIntroTables(
         unit: table.unit ? loc(lng, table.unit) : undefined,
         format: table.format,
         geo: table.geo,
+        time: table.time,
         nationalMode: table.nationalMode,
         rows: packs.flat(),
       };

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 1212-dashboard-deployment
+  namespace: 1212-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: 1212-dashboard
+  template:
+    metadata:
+      labels:
+        app: 1212-dashboard
+    spec:
+      imagePullSecrets:
+        - name: gitlab-secret
+      containers:
+        - name: 1212-dashboard
+          image: gitlab.nso.mn:5050/enebish/1212-dashboard:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: 1212-dashboard-svc
+  namespace: 1212-dashboard
+spec:
+  selector:
+    app: 1212-dashboard
+  ports:
+    - port: 80
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: 1212-dashboard-ingress
+  namespace: 1212-dashboard
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: 1212-dashboard.app.nso.mn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: 1212-dashboard-svc
+                port:
+                  number: 80
