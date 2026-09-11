@@ -23,3 +23,5 @@ kubectl apply -f k8s/deployment.yaml
 ```
 
 Host: http://1212-dashboard.app.nso.mn/
+
+Service/Ingress нэрс `nso-1212-dashboard-*` (тоогоор эхлэхийг k8s зөвшөөрдөггүй).
