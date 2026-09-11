@@ -3,8 +3,15 @@ kind: Ingress
 metadata:
   name: nso-1212-dashboard-ingress
   namespace: 1212-dashboard
+  annotations:
+    cert-manager.io/issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - 1212-dashboard.app.nso.mn
+      secretName: 1212-dashboard-tls
   rules:
     - host: 1212-dashboard.app.nso.mn
       http:
