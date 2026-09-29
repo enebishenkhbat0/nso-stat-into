@@ -5,7 +5,6 @@ import WidgetList from "@/components/statcate-intro/WidgetList";
 import { useIntroDashboard } from "@/components/statcate-intro/useIntroDashboard";
 import { COPY } from "@/lib/statcate-intro/constants";
 import { loc } from "@/lib/statcate-intro/format";
-import { formatPeriodAxis } from "@/lib/statcate-intro/query";
 import "./intro.scss";
 
 type Props = {
@@ -16,7 +15,7 @@ type Props = {
 
 export default function SectorIntroDashboard({ lng, sector, subsector }: Props) {
   const dash = useIntroDashboard({ lng, sector, subsector });
-  const { config, loading, error, year, setYear, years, monthly } = dash;
+  const { config, loading, error, year, setYear, years } = dash;
 
   if (!config) return null;
 
@@ -34,6 +33,7 @@ export default function SectorIntroDashboard({ lng, sector, subsector }: Props) 
 
   const title = loc(lng, config.title);
   const subtitle = config.subtitle ? loc(lng, config.subtitle) : "";
+  const hideYearSelector = config.id === "human-development-index";
 
   return (
     <div className="sector-intro">
@@ -44,16 +44,18 @@ export default function SectorIntroDashboard({ lng, sector, subsector }: Props) 
             {subtitle ? <span> · {subtitle}</span> : null}
           </h3>
         </div>
-        <label className="sector-intro-year">
-          <span>{loc(lng, monthly ? COPY.month : COPY.year)}</span>
-          <select value={year} onChange={(event) => setYear(event.target.value)}>
-            {years.map((item) => (
-              <option key={item} value={item}>
-                {monthly ? formatPeriodAxis(item) : item}
-              </option>
-            ))}
-          </select>
-        </label>
+        {!hideYearSelector && (
+          <label className="sector-intro-year">
+            <span>{loc(lng, COPY.year)}</span>
+            <select value={year} onChange={(event) => setYear(event.target.value)}>
+              {years.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </header>
 
       <WidgetList dash={dash} />

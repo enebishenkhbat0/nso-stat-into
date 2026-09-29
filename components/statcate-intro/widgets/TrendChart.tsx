@@ -3,27 +3,18 @@
 import ReactECharts from "echarts-for-react";
 import { TrendMark } from "@/lib/statcate-intro/marks";
 import { COPY, INTRO_COLORS } from "@/lib/statcate-intro/constants";
-import { formatValue, loc } from "@/lib/statcate-intro/format";
+import { loc } from "@/lib/statcate-intro/format";
 import { trendChartOption } from "@/lib/statcate-intro/charts";
-import {
-  formatPeriodAxis,
-  hasYear,
-  isMonthPeriod,
-  listPeriods,
-  listYears,
-  nationalValue,
-  timeDimOf,
-} from "@/lib/statcate-intro/query";
+import { listYears, nationalValue } from "@/lib/statcate-intro/query";
 import type { TrendWidget } from "@/lib/statcate-intro/types";
 import type { IntroDashboardState } from "@/components/statcate-intro/useIntroDashboard";
 
 type Props = {
   widget: TrendWidget;
   dash: IntroDashboardState;
-  chartHeight?: number;
 };
 
-export default function TrendChart({ widget, dash, chartHeight }: Props) {
+export default function TrendChart({ widget, dash }: Props) {
   const { config, tables, lng } = dash;
   if (!config) return null;
 
@@ -31,57 +22,25 @@ export default function TrendChart({ widget, dash, chartHeight }: Props) {
   const selected = ids
     .map((id) => tables.find((table) => table.id === id))
     .filter((table): table is NonNullable<typeof table> => Boolean(table));
-
-  const periodPool = [
-    ...new Set(selected.flatMap((table) => listPeriods(table.rows, timeDimOf(config, table)))),
-  ];
-  const monthly = periodPool.some(isMonthPeriod);
-  const labels = (
-    monthly
-      ? periodPool.filter(isMonthPeriod)
-      : [...new Set(selected.flatMap((table) => listYears(table.rows, timeDimOf(config, table))))]
-  ).sort((a, b) => {
-    if (monthly) {
-      const [ay, am = "12"] = a.split("-");
-      const [by, bm = "12"] = b.split("-");
-      return Number(ay) * 100 + Number(am) - (Number(by) * 100 + Number(bm));
-    }
-    return Number(a) - Number(b);
-  });
-
+  const labels = [
+    ...new Set(selected.flatMap((table) => listYears(table.rows, config.dimensions.time))),
+  ].sort((a, b) => Number(a) - Number(b));
   const option = trendChartOption(
     labels,
-    selected.map((table) => ({
-      name: table.label,
-      data: labels.map((period) =>
-        hasYear(table.rows, config, period, table)
-          ? nationalValue(table.rows, config, period, undefined, table)
-          : null,
-      ),
-    })),
+    selected.map((table) => {
+      const years = new Set(listYears(table.rows, config.dimensions.time));
+      return {
+        name: table.label,
+        data: labels.map((year) =>
+          years.has(year) ? nationalValue(table.rows, config, year, undefined, table) : null,
+        ),
+      };
+    }),
     config.palette ?? INTRO_COLORS,
-    widget.yAxis ??
-      (selected.every((table) => table.format === "percent" || table.format === "decimal")
-        ? "nice"
-        : "fromZero"),
-    {
-      lng,
-      formatValue: (value, seriesName) => {
-        const table = selected.find((item) => item.label === seriesName);
-        return formatValue(value, lng, table?.format ?? selected[0]?.format ?? "count");
-      },
-    },
-    monthly
-      ? {
-          formatter: (value: string) => formatPeriodAxis(String(value)),
-          rotate: labels.length > 20 ? 40 : 0,
-          hideOverlap: true,
-        }
-      : undefined,
+    widget.yAxis ?? (selected.every((table) => table.format === "percent" || table.format === "decimal") ? "nice" : "fromZero"),
   );
   const icon = config.sectionIcons?.trend;
-  // Paired half-row height wins so adjacent axes line up.
-  const height = chartHeight ?? widget.height ?? 280;
+  const height = widget.height ?? 380;
 
   return (
     <div className="sector-intro-panel">
@@ -91,10 +50,10 @@ export default function TrendChart({ widget, dash, chartHeight }: Props) {
         ) : (
           <TrendMark size={16} />
         )}
-        {loc(lng, widget.title ?? COPY.trend)}
+        {loc(lng, COPY.trend)}
       </h4>
       <div className="sector-intro-chart" style={{ height }}>
-        <ReactECharts option={option} style={{ height: "100%", width: "100%" }} notMerge />
+        <ReactECharts option={option} style={{ height, width: "100%" }} notMerge />
       </div>
     </div>
   );

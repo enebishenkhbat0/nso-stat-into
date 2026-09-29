@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { COPY } from "@/lib/statcate-intro/constants";
 import { loc } from "@/lib/statcate-intro/format";
 import { loadIntroTables } from "@/lib/statcate-intro/load";
-import { listPeriodOptions } from "@/lib/statcate-intro/query";
+import { listYears } from "@/lib/statcate-intro/query";
 import { getIntroDashboardConfig } from "@/lib/statcate-intro/registry";
 import type { IntroTableData } from "@/lib/statcate-intro/types";
 
@@ -22,7 +22,6 @@ export function useIntroDashboard({ lng, sector, subsector }: Args) {
   const [error, setError] = useState<string | null>(null);
   const [year, setYear] = useState("");
   const [years, setYears] = useState<string[]>([]);
-  const [monthly, setMonthly] = useState(false);
   const [tables, setTables] = useState<IntroTableData[]>([]);
 
   useEffect(() => {
@@ -36,11 +35,12 @@ export function useIntroDashboard({ lng, sector, subsector }: Args) {
       try {
         const packs = await loadIntroTables(lng, sectorName, subsectorName, config);
         if (cancelled) return;
-        const options = listPeriodOptions(packs, config);
+        const uniqueYears = [
+          ...new Set(packs.flatMap((table) => listYears(table.rows, config.dimensions.time))),
+        ].sort((a, b) => Number(b) - Number(a));
         setTables(packs);
-        setMonthly(options.monthly);
-        setYears(options.periods);
-        setYear((prev) => (prev && options.periods.includes(prev) ? prev : options.periods[0] ?? ""));
+        setYears(uniqueYears);
+        setYear((prev) => (prev && uniqueYears.includes(prev) ? prev : uniqueYears[0] ?? ""));
       } catch {
         if (!cancelled) setError(loc(lng, COPY.loadError));
       } finally {
@@ -59,7 +59,7 @@ export function useIntroDashboard({ lng, sector, subsector }: Args) {
     [tables],
   );
 
-  return { config, loading, error, year, setYear, years, monthly, tables, tablesById, lng };
+  return { config, loading, error, year, setYear, years, tables, tablesById, lng };
 }
 
 export type IntroDashboardState = ReturnType<typeof useIntroDashboard>;

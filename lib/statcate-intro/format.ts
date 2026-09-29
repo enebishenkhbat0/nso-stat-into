@@ -5,14 +5,8 @@ export function loc(lng: string, text: LocalizedText) {
 }
 
 export function num(value: unknown) {
-  return finiteNum(value) ?? 0;
-}
-
-/** null / "" / NaN → null. Жинхэнэ 0-ийг 0 гэж үлдээнэ. */
-export function finiteNum(value: unknown) {
-  if (value == null || value === "") return null;
   const n = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) ? n : 0;
 }
 
 export function trimLabel(value: unknown) {
@@ -26,18 +20,16 @@ export function formatCount(value: number, lng: string) {
 }
 
 export function formatValue(
-  value: number | null | undefined,
+  value: number,
   lng: string,
   format: "count" | "percent" | "decimal" | "currency" = "count",
 ) {
-  if (value == null || !Number.isFinite(value)) return "—";
   const locale = lng === "en" ? "en-US" : "mn-MN";
   if (format === "percent") {
     return `${value.toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 0 })}%`;
   }
   if (format === "decimal") {
-    const digits = Number.isInteger(value) ? 0 : Math.abs(value) >= 100 ? 1 : 2;
-    return value.toLocaleString(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    return value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   if (format === "currency") {
     return value.toLocaleString(locale, { maximumFractionDigits: 0 });

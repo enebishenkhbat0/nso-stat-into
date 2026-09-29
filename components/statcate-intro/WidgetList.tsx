@@ -7,18 +7,30 @@ import TrendChart from "@/components/statcate-intro/widgets/TrendChart";
 import RegionBarChart from "@/components/statcate-intro/widgets/RegionBarChart";
 import RegionMap from "@/components/statcate-intro/widgets/RegionMap";
 import CategoryBarChart from "@/components/statcate-intro/widgets/CategoryBarChart";
-import { INTRO_HALF_CHART_HEIGHT } from "@/lib/statcate-intro/constants";
+import HouseholdFlow from "@/components/statcate-intro/widgets/HouseholdFlow";
+import RatioGauge from "@/components/statcate-intro/widgets/RatioGauge";
+import CategorySegments from "@/components/statcate-intro/widgets/CategorySegments";
+import HdiKpis from "@/components/statcate-intro/widgets/HdiKpis";
+import RegionRanking from "@/components/statcate-intro/widgets/RegionRanking";
+import RegionDonutGrid from "@/components/statcate-intro/widgets/RegionDonutGrid";
 import type { IntroDashboardState } from "@/components/statcate-intro/useIntroDashboard";
 import type { IntroWidget, IntroWidgetSpan } from "@/lib/statcate-intro/types";
 
 function spanOf(widget: IntroWidget): IntroWidgetSpan {
   if (widget.span) return widget.span;
-  return widget.type === "kpis" || widget.type === "category-flow" || widget.type === "category-stats"
+  return widget.type === "kpis" ||
+    widget.type === "category-flow" ||
+    widget.type === "category-stats" ||
+    widget.type === "household-flow" ||
+    widget.type === "category-segments" ||
+    widget.type === "hdi-kpis" ||
+    widget.type === "region-ranking" ||
+    widget.type === "region-donut-grid"
     ? "full"
     : "half";
 }
 
-function renderWidget(widget: IntroWidget, dash: IntroDashboardState, chartHeight?: number) {
+function renderWidget(widget: IntroWidget, dash: IntroDashboardState) {
   switch (widget.type) {
     case "kpis":
       return <KpiRow widget={widget} dash={dash} />;
@@ -27,13 +39,25 @@ function renderWidget(widget: IntroWidget, dash: IntroDashboardState, chartHeigh
     case "category-stats":
       return <CategoryStats widget={widget} dash={dash} />;
     case "category-bars":
-      return <CategoryBarChart widget={widget} dash={dash} chartHeight={chartHeight} />;
+      return <CategoryBarChart widget={widget} dash={dash} />;
     case "trend":
-      return <TrendChart widget={widget} dash={dash} chartHeight={chartHeight} />;
+      return <TrendChart widget={widget} dash={dash} />;
     case "region-bars":
-      return <RegionBarChart widget={widget} dash={dash} chartHeight={chartHeight} />;
+      return <RegionBarChart widget={widget} dash={dash} />;
     case "region-map":
-      return <RegionMap widget={widget} dash={dash} chartHeight={chartHeight} />;
+      return <RegionMap widget={widget} dash={dash} />;
+    case "household-flow":
+      return <HouseholdFlow widget={widget} dash={dash} />;
+    case "ratio-gauge":
+      return <RatioGauge widget={widget} dash={dash} />;
+    case "category-segments":
+      return <CategorySegments widget={widget} dash={dash} />;
+    case "hdi-kpis":
+      return <HdiKpis widget={widget} dash={dash} />;
+    case "region-ranking":
+      return <RegionRanking widget={widget} dash={dash} />;
+    case "region-donut-grid":
+      return <RegionDonutGrid widget={widget} dash={dash} />;
   }
 }
 
@@ -70,7 +94,7 @@ export default function WidgetList({ dash }: { dash: IntroDashboardState }) {
           <section key={i} className="sector-intro-block sector-intro-charts">
             {row.items.map((widget, j) => (
               <div key={`${widget.type}-${j}`} className="sector-intro-chart-cell">
-                {renderWidget(widget, dash, INTRO_HALF_CHART_HEIGHT)}
+                {renderWidget(widget, dash)}
               </div>
             ))}
           </section>

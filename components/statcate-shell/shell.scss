@@ -2,46 +2,45 @@
   min-height: 100vh;
   background: #fff;
   color: #222;
-  font-family: "sf-pro-text", roboto, "Segoe UI", system-ui, sans-serif;
+  font-family: "sf-pro-text", roboto, system-ui, sans-serif;
 }
 
 .nso-shell-inner {
   display: flex;
   width: 100%;
-  max-width: 1600px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 16px 20px 40px;
+  padding: 20px 40px 80px;
   align-items: flex-start;
-  gap: 20px;
+  gap: 24px;
 }
 
 .nso-shell-sidebar {
-  flex: 0 0 280px;
-  width: 280px;
-  min-width: 260px;
-  max-width: 300px;
-  padding: 0;
+  flex: 0 0 270px;
+  width: 270px;
+  min-width: 270px;
+  max-width: 270px;
   overflow: hidden;
 }
 
 .nso-shell-search {
   position: relative;
   z-index: 0;
-  margin: 0 0 10px;
+  margin: 0 0 22px;
 }
 
 .nso-shell-search input {
   display: block;
   width: 100%;
   max-width: 100%;
-  height: 36px;
-  padding: 0 10px 0 34px;
+  height: 40px;
+  padding: 0 12px 0 36px;
   border: 1px solid #d8dee6;
-  border-radius: 4px;
+  border-radius: 6px;
   background: #fff;
-  color: #111;
+  color: #222;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 14px;
 }
 
 .nso-shell-search input::placeholder {
@@ -50,11 +49,11 @@
 
 .nso-shell-search svg {
   position: absolute;
-  top: 10px;
-  left: 11px;
-  width: 15px;
-  height: 15px;
-  color: #555;
+  top: 11px;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: #1a5cad;
   pointer-events: none;
 }
 
@@ -66,17 +65,17 @@
 .nso-shell-sector > button {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   margin: 0;
-  padding: 8px 10px 8px 12px;
+  padding: 11px 12px 11px 14px;
   border: 0;
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
   background: #fff;
-  color: #111;
+  color: #1a5cad;
   font: inherit;
-  font-size: 14.5px;
+  font-size: 15.5px;
   font-weight: 500;
-  line-height: 1.35;
   text-align: left;
   cursor: pointer;
 }
@@ -85,8 +84,7 @@
 .nso-shell-sector.is-active > button {
   background: #eaf3fb;
   border-left-color: #1a5cad;
-  color: #111;
-  font-weight: 600;
+  color: #12324f;
 }
 
 .nso-shell-sector > button:hover {
@@ -95,7 +93,7 @@
 
 .nso-shell-children {
   display: none;
-  padding: 2px 0 6px;
+  padding: 4px 0 10px;
 }
 
 .nso-shell-sector.is-open .nso-shell-children {
@@ -104,34 +102,32 @@
 
 .nso-shell-children a {
   display: block;
-  padding: 5px 10px 5px 20px;
-  color: #111;
-  font-size: 13.5px;
+  padding: 7px 12px 7px 22px;
+  color: #1a5cad;
+  font-size: 14px;
   line-height: 1.35;
   text-decoration: none;
 }
 
 .nso-shell-children a:hover {
-  color: #000;
-  background: #f4f8fc;
+  color: #0f3f78;
 }
 
 .nso-shell-children a.is-active {
   position: relative;
   background: #eaf3fb;
-  color: #111;
-  font-weight: 600;
+  color: #5b6e80;
 }
 
 .nso-shell-children a.is-active::before {
   content: "";
   position: absolute;
   top: 50%;
-  left: 9px;
+  left: 10px;
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #555;
+  background: #8a97a3;
   transform: translateY(-50%);
 }
 
@@ -144,49 +140,48 @@
 .nso-shell-title {
   margin: 0 0 4px;
   color: #222;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 40px;
 }
 
 .nso-shell-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0;
-  margin: 10px 0 14px;
-  border-bottom: 1px solid #dee2e6;
+  margin: 8px 0 18px;
+  border-bottom: 2px solid #dee2e6;
 }
 
-.nso-shell-tabs span,
 .nso-shell-tabs a {
-  margin-bottom: -1px;
-  padding: 10px 14px;
+  margin-bottom: -2px;
+  padding: 14px 18px;
   border-bottom: 2px solid transparent;
-  color: #111;
-  font-size: 14px;
+  color: #5b6e80;
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1.2;
   text-decoration: none;
 }
 
 .nso-shell-tabs a:hover {
-  color: #000;
+  color: #222;
+  border-bottom-color: #c5d0d8;
 }
 
-.nso-shell-tabs .is-active {
-  color: #111;
-  border-bottom-color: #111;
+.nso-shell-tabs a.is-active {
+  color: #1a5cad;
+  border-bottom-color: #1a5cad;
 }
 
 .nso-shell-placeholder {
-  margin: 16px 0;
-  padding: 20px 18px;
+  margin: 24px 0;
+  padding: 28px 24px;
   border: 1px dashed #d0d7de;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #f8fafc;
   color: #5b6e80;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.55;
 }
 
 .nso-shell-placeholder strong {
@@ -195,27 +190,25 @@
   color: #12324f;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 900px) {
   .nso-shell-inner {
     display: block;
-    max-width: 960px;
-    padding: 14px 12px 32px;
+    padding: 16px 16px 48px;
   }
 
   .nso-shell-sidebar {
     width: 100%;
     min-width: 0;
     max-width: none;
-    margin-bottom: 14px;
+    margin-bottom: 20px;
   }
 
-  .nso-shell-title {
-    font-size: 18px;
+  .nso-shell-main {
+    padding-left: 0;
   }
-}
 
-@media (min-width: 1600px) {
-  .nso-shell-inner {
-    max-width: 1600px;
+  .nso-shell-tabs a {
+    padding: 12px 10px;
+    font-size: 13.5px;
   }
 }

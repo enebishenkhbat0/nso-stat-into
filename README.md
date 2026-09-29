@@ -1,27 +1,58 @@
-# 1212-dashboard
+# NSO statcate intro dashboards
 
-NSO StatCate intro dashboards (Next.js). Live data from `https://data.1212.mn`.
+`nso-nextjs`-ийн **Танилцуулга** dashboard-уудыг тусад нь хуулсан төсөл. Гадны хүн зөвхөн энэ хэсэг дээр ажиллана. **1212.mn-ийн эх код энэ төсөлд байхгүй.**
 
-## Local
+Хуудасны бүтэц 1212.mn-ий `/statcate` хуудастай ижил: зүүн цэс, таб (Хүснэгт / Танилцуулга / Тайлан / Аргачлал / Чанарын тайлан). Хөгжүүлэх ёстой хэсэг нь **Танилцуулга** таб доторх dashboard.
+
+Эх сайт дээрх зам:
+
+`/mn/statcate/indicator/Society, development/<subsector>`
+
+## Ажиллуулах
 
 ```bash
+cd D:\ENEBISH\Code\nso-statcate-intro
 npm install
 npm run dev
 ```
 
-## Deploy (NSO GitLab + k8s)
+Нээх: [http://localhost:3000](http://localhost:3000)
 
-Same pattern as `nso-dashboard`:
+Шууд нээгдэх: Нийгэм, хөгжил → Тогтвортой хөгжлийн зорилго, **Танилцуулга** таб.
 
-1. Push to `main` → GitLab CI builds/pushes `gitlab.nso.mn:5050/enebish/1212-dashboard:latest`
-2. Once (Lens / kubectl):
+Өгөгдөл `https://data.1212.mn/api/v1` дээрээс ирнэ (интернет хэрэгтэй).
 
-```bash
-kubectl apply -f k8s/namespace.yaml
-# Create gitlab-secret in 1212-dashboard ns (see k8s/gitlab-secret.example.yaml)
-kubectl apply -f k8s/deployment.yaml
+## Юу багтсан бэ
+
+| Салбар (PX folder) | Config |
+|---|---|
+| Sustainable Development Goals | `lib/statcate-intro/configs/sdg.ts` |
+| Poverty, inequality and minimum subsistence level | `lib/statcate-intro/configs/poverty.ts` |
+| Social Insurance and Welfare | `lib/statcate-intro/configs/social-insurance.ts` |
+| Monasteries, Temples and Churches | `lib/statcate-intro/configs/monasteries.ts` |
+
+## Хавтас
+
+```
+app/                              хуудас + /api/table-view (PX proxy)
+components/statcate-shell/        1212 шиг цэс/таб бүрхүүл (merge хийхгүй)
+components/statcate-intro/        dashboard UI, widget
+lib/statcate-shell/               цэсний жагсаалт (merge хийхгүй)
+lib/statcate-intro/               config, PX, график
+lib/socio-dashboard/              json-stat parse
+public/icons/                     KPI / map icon
+public/census-dashboard/geo/      аймгийн газрын зураг
 ```
 
-Host: http://1212-dashboard.app.nso.mn/
+Шинэ салбар: `lib/statcate-intro/configs/` дээр файл нэмээд `configs/index.ts` жагсаалтад хийнэ.
 
-Service/Ingress нэрс `nso-1212-dashboard-*` (тоогоор эхлэхийг k8s зөвшөөрдөггүй).
+## Буцааж нэгтгэх
+
+**Зөвхөн эдгээрийг** `nso-nextjs` руу хуулна:
+
+- `components/statcate-intro/`
+- `lib/statcate-intro/`
+
+Файлын зам `nso-nextjs`-тэй ижил (`@/components/statcate-intro`, `@/lib/statcate-intro`).
+
+`components/statcate-shell/`, `lib/statcate-shell/`, `app/` бүрхүүл нь зөвхөн энэ төсөлд зориулсан — 1212.mn дээр аль хэдийн цэс, таб байгаа тул тэдгээрийг merge хийхгүй.

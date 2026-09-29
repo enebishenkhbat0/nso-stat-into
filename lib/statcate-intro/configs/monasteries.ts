@@ -71,7 +71,12 @@ export const monasteries: IntroDashboardConfig = {
     {
       type: "region-map",
       table: "monasteries",
-      layout: { legend: "horizontal" },
+      layout: {
+        legend: "vertical",
+        layoutCenter: ["50%", "52%"],
+        layoutSize: "118%",
+        aspectScale: 0.75,
+      },
     },
   ],
 };

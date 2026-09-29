@@ -1,0 +1,125 @@
+import type { IntroDashboardConfig } from "@/lib/statcate-intro/types";
+
+const INCOME_FILE = "DT_NSO_1900_001V1.px";
+const EXPENSE_FILE = "DT_NSO_1900_002V1.px";
+const NATIONAL = { Байршил: ["0"] };
+
+export const householdIncomeExpense: IntroDashboardConfig = {
+  id: "household-income-expense",
+  subsector: "Household income and expenditure",
+  title: {
+    mn: "Өрхийн мөнгөн орлого, зарлага",
+    en: "Household Cash Income and Expenditure",
+  },
+  subtitle: {
+    mn: "Өрхийн орлого болон зарлагын бүтцийн тойм",
+    en: "Overview of household income and expenditure structure",
+  },
+  palette: ["#10B981", "#0EA5E9", "#F97316", "#EF4444"],
+  mapColors: ["#D1FAE5", "#6EE7B7", "#10B981", "#047857"],
+  dimensions: {
+    time: "Он",
+  },
+  tables: [
+    {
+      id: "total-income",
+      file: INCOME_FILE,
+      label: { mn: "Мөнгөн орлого", en: "Total Cash Income" },
+      icon: "welfare",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Орлогын төрөл": ["1"], ...NATIONAL },
+    },
+    {
+      id: "salary",
+      file: INCOME_FILE,
+      label: { mn: "Цалин хөлс", en: "Wages and Salaries" },
+      icon: "welfare",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Орлогын төрөл": ["2"], ...NATIONAL },
+    },
+    {
+      id: "pension",
+      file: INCOME_FILE,
+      label: { mn: "Тэтгэвэр, тэтгэмж", en: "Pensions and Allowances" },
+      icon: "pensioner",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Орлогын төрөл": ["3"], ...NATIONAL },
+    },
+    {
+      id: "business-income",
+      file: INCOME_FILE,
+      label: { mn: "Өрхийн үйлдвэрлэл, үйлчилгээний орлого", en: "Household Enterprise Income" },
+      icon: "welfare",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Орлогын төрөл": ["4"], ...NATIONAL },
+    },
+    {
+      id: "other-income",
+      file: INCOME_FILE,
+      label: { mn: "Бусад", en: "Other Income" },
+      icon: "other",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Орлогын төрөл": ["5"], ...NATIONAL },
+    },
+    {
+      id: "total-expense",
+      file: EXPENSE_FILE,
+      label: { mn: "Мөнгөн зарлага", en: "Total Cash Expenditure" },
+      icon: "welfare",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Зарлагын төрөл": ["1"], ...NATIONAL },
+    },
+    {
+      id: "food-expense",
+      file: EXPENSE_FILE,
+      label: { mn: "Хүнсний зүйлийн зарлага", en: "Food Expenditure" },
+      icon: "food",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Зарлагын төрөл": ["2"], ...NATIONAL },
+    },
+    {
+      id: "non-food-expense",
+      file: EXPENSE_FILE,
+      label: { mn: "Хүнсний бус бараа, үйлчилгээний зарлага", en: "Non-food Goods and Services" },
+      icon: "goods",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Зарлагын төрөл": ["3"], ...NATIONAL },
+    },
+    {
+      id: "gift-expense",
+      file: EXPENSE_FILE,
+      label: { mn: "Бусдад өгсөн бэлэг, тусламж", en: "Gifts and Assistance Given" },
+      icon: "welfare",
+      format: "currency",
+      unit: { mn: "₮", en: "MNT" },
+      select: { "Зарлагын төрөл": ["5"], ...NATIONAL },
+    },
+  ],
+  widgets: [
+    {
+      type: "household-flow",
+      span: "full",
+      incomeTables: ["salary", "pension", "business-income", "other-income"],
+      expenseTables: ["food-expense", "non-food-expense", "gift-expense"],
+      totalIncomeTable: "total-income",
+      totalExpenseTable: "total-expense",
+      icons: {
+        salary: "wallet",
+        pension: "elderly",
+        "business-income": "sewing",
+        "other-income": "other",
+        "food-expense": "food",
+        "non-food-expense": "goods",
+        "gift-expense": "gift",
+      },
+    },
+  ],
+};

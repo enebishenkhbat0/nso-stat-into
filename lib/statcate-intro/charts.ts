@@ -1,29 +1,13 @@
 import type { EChartsOption } from "echarts";
 import { INTRO_COLORS, INTRO_FONT } from "@/lib/statcate-intro/constants";
-import { introAxisTooltipFormatter, introTooltipBase } from "@/lib/statcate-intro/tooltip";
 import type { TrendYAxisMode } from "@/lib/statcate-intro/types";
 
 const text = { fontFamily: INTRO_FONT };
-
-/** Shared plot box so paired trend + bar cards align top/bottom axes. */
-const ALIGNED_GRID = { left: 12, right: 16, top: 40, bottom: 28, containLabel: true } as const;
-/** Charts without a legend — avoid empty top space that looks stretched. */
-const PLOT_GRID = { left: 12, right: 16, top: 12, bottom: 28, containLabel: true } as const;
-
-export type ChartTooltipMeta = {
-  lng?: string;
-  year?: string;
-  valueLabel?: string;
-  formatValue?: (value: number, seriesName?: string) => string;
+const tooltipBase = {
+  extraCssText: `font-family: ${INTRO_FONT};`,
+  textStyle: { fontFamily: INTRO_FONT, fontSize: 13 },
+  className: "sector-intro-echart-tooltip",
 };
-
-function compactAxisNumber(value: number) {
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) return `${Number((value / 1_000_000).toFixed(1))}M`;
-  if (abs >= 10_000) return `${Number((value / 1_000).toFixed(0))}k`;
-  if (Number.isInteger(value)) return String(value);
-  return Number(value.toFixed(1)).toString();
-}
 
 function niceStep(span: number) {
   const raw = span / 4;
@@ -49,51 +33,25 @@ function trendYAxis(series: { data: (number | null)[] }[], mode: TrendYAxisMode)
   return { min: min >= 0 ? Math.max(0, lo) : lo, max: hi };
 }
 
-function chartTooltip(meta?: ChartTooltipMeta) {
-  return {
-    ...introTooltipBase,
-    formatter: introAxisTooltipFormatter(meta),
-  };
-}
-
 export function trendChartOption(
   years: string[],
   series: { name: string; data: (number | null)[] }[],
   colors: string[] = INTRO_COLORS,
   yAxis: TrendYAxisMode = "fromZero",
-  tooltip?: ChartTooltipMeta,
-  xAxisLabel?: { formatter?: (value: string) => string; rotate?: number; hideOverlap?: boolean },
 ): EChartsOption {
   return {
     color: colors,
     textStyle: text,
-    tooltip: { trigger: "axis", ...chartTooltip(tooltip) },
+    tooltip: { trigger: "axis", ...tooltipBase },
     legend: {
-      top: 0,
-      left: "center",
-      itemGap: 18,
+      bottom: 0,
+      itemGap: 22,
       itemWidth: 10,
       itemHeight: 10,
-      padding: [0, 0, 0, 0],
       textStyle: { ...text, color: "#5b6b80", fontSize: 12 },
     },
-    grid: {
-      ...ALIGNED_GRID,
-      bottom: xAxisLabel?.rotate ? 36 : ALIGNED_GRID.bottom,
-    },
-    xAxis: {
-      type: "category",
-      data: years,
-      axisLabel: {
-        ...text,
-        color: "#64748b",
-        margin: 8,
-        ...(xAxisLabel?.formatter ? { formatter: xAxisLabel.formatter } : {}),
-        ...(xAxisLabel?.rotate ? { rotate: xAxisLabel.rotate } : {}),
-        ...(xAxisLabel?.hideOverlap ? { hideOverlap: true } : {}),
-      },
-      axisTick: { alignWithLabel: true },
-    },
+    grid: { left: 48, right: 18, top: 28, bottom: 44, containLabel: true },
+    xAxis: { type: "category", data: years, axisLabel: { ...text, color: "#64748b" } },
     yAxis: {
       type: "value",
       scale: true,
@@ -103,7 +61,7 @@ export function trendChartOption(
       axisLabel: {
         ...text,
         color: "#64748b",
-        formatter: compactAxisNumber,
+        formatter: (value: number) => (Number.isInteger(value) ? String(value) : Number(value.toFixed(1)).toString()),
       },
     },
     series: series.map((item) => ({
@@ -111,9 +69,8 @@ export function trendChartOption(
       type: "line",
       smooth: true,
       symbol: "circle",
-      symbolSize: years.length > 24 ? 4 : 7,
+      symbolSize: 7,
       connectNulls: false,
-      lineStyle: { width: 2.5 },
       data: item.data,
     })),
   };
@@ -123,21 +80,19 @@ export function groupedBarOption(
   categories: string[],
   series: { name: string; data: number[] }[],
   colors: string[] = INTRO_COLORS,
-  tooltip?: ChartTooltipMeta,
 ): EChartsOption {
   return {
     color: colors,
     textStyle: text,
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, ...chartTooltip(tooltip) },
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, ...tooltipBase },
     legend: {
-      top: 0,
-      left: "center",
+      bottom: 0,
       itemGap: 22,
       itemWidth: 10,
       itemHeight: 10,
       textStyle: { ...text, color: "#5b6b80", fontSize: 12 },
     },
-    grid: { ...ALIGNED_GRID, left: 52 },
+    grid: { left: 52, right: 20, top: 16, bottom: 48 },
     xAxis: {
       type: "category",
       data: categories,
@@ -147,7 +102,7 @@ export function groupedBarOption(
     yAxis: {
       type: "value",
       splitLine: { lineStyle: { color: "#e2e8f0" } },
-      axisLabel: { ...text, color: "#64748b", formatter: compactAxisNumber },
+      axisLabel: { ...text, color: "#64748b" },
     },
     series: series.map((item) => ({
       name: item.name,
@@ -164,7 +119,6 @@ export function categoryBarOption(
   values: number[],
   color = INTRO_COLORS[0],
   suffix = "",
-  tooltip?: ChartTooltipMeta,
 ): EChartsOption {
   return {
     color: [color],
@@ -172,37 +126,42 @@ export function categoryBarOption(
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
-      ...chartTooltip({
-        ...tooltip,
-        valueLabel: tooltip?.valueLabel ?? "",
-        formatValue:
-          tooltip?.formatValue ??
-          ((value) => `${Number.isFinite(value) ? value : ""}${suffix}`),
-      }),
+      ...tooltipBase,
+      formatter: (params) => {
+        const item = Array.isArray(params) ? params[0] : params;
+        const row = item as { name?: string; value?: number };
+        return `${row.name ?? ""}: <b>${row.value ?? ""}${suffix}</b>`;
+      },
     },
     legend: { show: false },
-    grid: { ...PLOT_GRID },
+    grid: { left: 48, right: 18, top: 20, bottom: 64, containLabel: true },
     xAxis: {
       type: "category",
       data: categories,
-      axisLabel: { ...text, color: "#475569", interval: 0 },
+      axisLabel: {
+        ...text,
+        color: "#475569",
+        interval: 0,
+        rotate: 28,
+        fontSize: 11,
+        overflow: "truncate",
+        width: 90,
+      },
       axisTick: { show: false },
     },
     yAxis: {
       type: "value",
-      min: values.some((value) => value < 0) ? undefined : 0,
-      splitNumber: 4,
+      min: 0,
       splitLine: { lineStyle: { color: "#e2e8f0" } },
       axisLabel: {
         ...text,
         color: "#64748b",
-        formatter: (value: number) => `${compactAxisNumber(value)}${suffix}`,
+        formatter: (value: number) => `${value}${suffix}`,
       },
     },
     series: [
       {
         type: "bar",
-        name: tooltip?.valueLabel || undefined,
         data: values,
         barMaxWidth: 42,
         itemStyle: { borderRadius: [8, 8, 0, 0] },
@@ -211,50 +170,28 @@ export function categoryBarOption(
   };
 }
 
-export function regionBarOption(
-  rows: { name: string; value: number | null }[],
-  color = INTRO_COLORS[0],
-  tooltip?: ChartTooltipMeta,
-): EChartsOption {
+export function regionBarOption(rows: { name: string; value: number }[], color = INTRO_COLORS[0]): EChartsOption {
   return {
     color: [color],
     textStyle: text,
-    tooltip: {
-      trigger: "axis",
-      ...chartTooltip(tooltip),
-    },
-    grid: { ...PLOT_GRID, left: 8, top: 8 },
+    tooltip: { trigger: "axis", ...tooltipBase },
+    grid: { left: 108, right: 16, top: 8, bottom: 24 },
     xAxis: {
       type: "value",
-      splitNumber: 4,
       splitLine: { lineStyle: { color: "#e2e8f0" } },
-      axisLabel: {
-        ...text,
-        color: "#64748b",
-        hideOverlap: true,
-        margin: 6,
-        formatter: compactAxisNumber,
-      },
+      axisLabel: { ...text, color: "#64748b" },
     },
     yAxis: {
       type: "category",
       inverse: true,
       data: rows.map((item) => item.name),
-      axisLabel: {
-        ...text,
-        color: "#475569",
-        // Full PX labels — do not shorten/truncate.
-        interval: 0,
-        hideOverlap: false,
-      },
+      axisLabel: { ...text, color: "#475569", width: 96, overflow: "truncate" },
     },
     series: [
       {
         type: "bar",
-        name: tooltip?.valueLabel || undefined,
         data: rows.map((item) => item.value),
-        barMaxWidth: 16,
-        barCategoryGap: "28%",
+        barMaxWidth: 14,
         itemStyle: { borderRadius: [0, 8, 8, 0] },
       },
     ],

@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
 import type { EChartsOption } from "echarts";
 import { MapMark } from "@/lib/statcate-intro/marks";
-import { COPY, INTRO_FONT, INTRO_MAP_HEIGHT, INTRO_MAP_SERIES } from "@/lib/statcate-intro/constants";
+import { COPY, INTRO_FONT } from "@/lib/statcate-intro/constants";
 import { AIMAG_ID_TO_NAME, canonicalAimagName, mapColorPieces } from "@/lib/statcate-intro/aimag-map";
-import { formatValue, loc, finiteNum, trimLabel } from "@/lib/statcate-intro/format";
-import { formatPeriodAxis, isMonthPeriod, queryRows, yearOrLatest } from "@/lib/statcate-intro/query";
-import { introItemTooltipFormatter, introTooltipBase } from "@/lib/statcate-intro/tooltip";
+import { formatValue, loc, num, trimLabel } from "@/lib/statcate-intro/format";
+import { queryRows, yearOrLatest } from "@/lib/statcate-intro/query";
 import type { RegionMapLayout, RegionMapWidget } from "@/lib/statcate-intro/types";
 import type { IntroDashboardState } from "@/components/statcate-intro/useIntroDashboard";
 
@@ -17,32 +16,22 @@ const MAP_NAME = "nso-intro-aimag";
 const GEO_URL = "/census-dashboard/geo/aimag.geojson";
 
 function mapSeriesLayout(layout?: RegionMapLayout) {
-  const legend = layout?.legend ?? "horizontal";
-  const aspectScale = layout?.aspectScale ?? INTRO_MAP_SERIES.aspectScale;
-  const layoutCenter = layout?.layoutCenter ?? INTRO_MAP_SERIES.layoutCenter;
-  const layoutSize = layout?.layoutSize ?? INTRO_MAP_SERIES.layoutSize;
-
-  // Always center + size: filling left/top/right/bottom squeezes Mongolia sideways
-  // in tall half-cards. Prefer a wide geographic ratio.
-  if (layout?.layoutCenter || layout?.layoutSize != null) {
-    return { aspectScale, layoutCenter, layoutSize };
+  const aspectScale = layout?.aspectScale ?? 0.75;
+  if (layout?.layoutCenter && layout?.layoutSize) {
+    return { layoutCenter: layout.layoutCenter, layoutSize: layout.layoutSize, aspectScale };
   }
-
-  if (legend === "vertical") {
-    return {
-      aspectScale,
-      layoutCenter: ["58%", "46%"] as [string, string],
-      layoutSize: "112%",
-    };
-  }
-
-  return { aspectScale, layoutCenter, layoutSize };
+  return {
+    left: layout?.left ?? 8,
+    right: layout?.right ?? 8,
+    top: layout?.top ?? 12,
+    bottom: layout?.bottom ?? 48,
+    aspectScale,
+  };
 }
 
 type Props = {
   widget: RegionMapWidget;
   dash: IntroDashboardState;
-  chartHeight?: number;
 };
 
 type GeoCollection = {
@@ -54,20 +43,9 @@ type GeoCollection = {
   }[];
 };
 
-export default function RegionMap({ widget, dash, chartHeight }: Props) {
+export default function RegionMap({ widget, dash }: Props) {
   const { config, tablesById, year, lng } = dash;
   const [ready, setReady] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [geoRatio, setGeoRatio] = useState(0);
-
-  useEffect(() => {
-    const element = chartRef.current;
-    if (!element || !widget.layout?.fitToContainer) return;
-    const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [config, year, widget.layout?.fitToContainer]);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,16 +53,6 @@ export default function RegionMap({ widget, dash, chartHeight }: Props) {
       .then((res) => res.json())
       .then((json: GeoCollection) => {
         if (cancelled) return;
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        function visit(coordinates: unknown) {
-          if (!Array.isArray(coordinates)) return;
-          if (typeof coordinates[0] === "number" && typeof coordinates[1] === "number") {
-            minX = Math.min(minX, coordinates[0]); maxX = Math.max(maxX, coordinates[0]);
-            minY = Math.min(minY, coordinates[1]); maxY = Math.max(maxY, coordinates[1]);
-          } else coordinates.forEach(visit);
-        }
-        json.features.forEach((feature) => visit((feature.geometry as { coordinates?: unknown })?.coordinates));
-        if (maxY > minY) setGeoRatio((maxX - minX) / (maxY - minY));
         const features = (json.features ?? []).map((feature) => {
           const id = feature.properties?.id ?? feature.properties?.aimag_id;
           const name =
@@ -106,7 +74,7 @@ export default function RegionMap({ widget, dash, chartHeight }: Props) {
   }, []);
 
   const table = config && year ? tablesById[widget.table] : undefined;
-  const mapYear = table && config && year ? yearOrLatest(table.rows, config, year, table) : year;
+  const mapYear = table && config && year ? yearOrLatest(table.rows, config, year) : year;
   const geoDim = table?.geo ?? config?.dimensions.geo;
 
   const rows = useMemo(() => {
@@ -124,9 +92,7 @@ export default function RegionMap({ widget, dash, chartHeight }: Props) {
     )) {
       const name = canonicalAimagName(trimLabel(row[geoDim]));
       if (!name) continue;
-      const value = finiteNum(row.value);
-      if (value == null) continue;
-      byName.set(name, value);
+      byName.set(name, num(row.value));
     }
     return [...byName.entries()].map(([name, value]) => ({ name, value }));
   }, [config, table, widget.table, mapYear, geoDim]);
@@ -143,49 +109,48 @@ export default function RegionMap({ widget, dash, chartHeight }: Props) {
   const hoverColor = config.palette?.[1] ?? "#0E7C7B";
   const icon = config.sectionIcons?.map;
   const layout = widget.layout;
-  const height = chartHeight ?? layout?.height ?? INTRO_MAP_HEIGHT;
-  const legend = layout?.legend ?? "horizontal";
-  const aspect = layout?.aspectScale ?? INTRO_MAP_SERIES.aspectScale;
-  const fittedLayout = layout?.fitToContainer && containerWidth > 0 && geoRatio > 0
-    ? {
-        aspectScale: aspect,
-        layoutCenter: (layout.layoutCenter ?? INTRO_MAP_SERIES.layoutCenter) as [string, string],
-        layoutSize: Math.min(
-          containerWidth * 0.98,
-          (height * 0.94 - 28) * geoRatio * aspect,
-        ),
-      }
-    : mapSeriesLayout(layout);
+  const height = layout?.height ?? 380;
+
+  const badgeLabels = ["Дооод", "Дундаж-Доод", "Дундаж", "Дундаж-Дээд", "Өндөр"];
+  const legendBadges = pieces.map((piece, i) => {
+    const min = piece.gt;
+    const max = piece.lte;
+    const label = badgeLabels[i] ?? piece.label;
+    const range =
+      min != null && max != null
+        ? `${min.toFixed(digits)}-${max.toFixed(digits)}`
+        : max != null
+          ? `≤${max.toFixed(digits)}`
+          : min != null
+            ? `>${min.toFixed(digits)}`
+            : "";
+    return { label, range, color: piece.color };
+  });
 
   const option: EChartsOption = {
     textStyle: { fontFamily: INTRO_FONT },
     tooltip: {
       trigger: "item",
-      ...introTooltipBase,
-      formatter: introItemTooltipFormatter({
-        lng,
-        year: mapYear,
-        valueLabel: table?.unit || tableLabel,
-        formatValue: (value) => formatValue(value, lng, format),
-      }),
+      extraCssText: `font-family: ${INTRO_FONT};`,
+      textStyle: { fontFamily: INTRO_FONT, fontSize: 13 },
+      className: "sector-intro-echart-tooltip",
+      formatter: (params) => {
+        const item = params as { name?: string; value?: number };
+        if (item.value == null || Number.isNaN(Number(item.value))) return `${item.name ?? ""}`;
+        return `${item.name}<br/>${tableLabel}: <b>${formatValue(Number(item.value), lng, format)}</b>`;
+      },
     },
     visualMap: {
       type: "piecewise",
       pieces,
-      orient: legend,
-      ...(legend === "horizontal"
-        ? { left: "center", bottom: 4, itemGap: 14 }
-        : { left: 0, bottom: 0, itemGap: 6 }),
-      itemWidth: legend === "horizontal" ? 14 : 12,
-      itemHeight: 10,
-      textStyle: { color: "#5b6b80", fontSize: 11, fontFamily: INTRO_FONT },
+      show: false,
     },
     series: [
       {
         type: "map",
         map: MAP_NAME,
         roam: false,
-        ...fittedLayout,
+        ...mapSeriesLayout(layout),
         data: rows,
         name: tableLabel,
         itemStyle: { borderColor: "#fff", borderWidth: 0.8, areaColor: emptyColor },
@@ -206,15 +171,13 @@ export default function RegionMap({ widget, dash, chartHeight }: Props) {
         ) : (
           <MapMark size={16} />
         )}
-        {loc(lng, widget.title ?? COPY.byRegion)}
-        {mapYear && mapYear !== year ? (
-          <span> · {isMonthPeriod(mapYear) ? formatPeriodAxis(mapYear) : mapYear}</span>
-        ) : null}
+        {loc(lng, COPY.byRegion)}
+        {mapYear && mapYear !== year ? <span> · {mapYear}</span> : null}
       </h4>
-      <div ref={chartRef} className="sector-intro-chart sector-intro-chart--map" style={{ height }}>
+      <div className="sector-intro-chart sector-intro-chart--map" style={{ height }}>
         {ready ? (
           rows.length ? (
-            <ReactECharts option={option} style={{ height: "100%", width: "100%" }} notMerge />
+            <ReactECharts option={option} style={{ height, width: "100%" }} notMerge />
           ) : (
             <p className="sector-intro-map-loading">
               {lng === "en" ? "No regional breakdown for this year." : "Энэ онд аймгийн задаргаа байхгүй."}
@@ -224,6 +187,16 @@ export default function RegionMap({ widget, dash, chartHeight }: Props) {
           <p className="sector-intro-map-loading">{lng === "en" ? "Loading map…" : "Газрын зураг ачаалж байна…"}</p>
         )}
       </div>
+
+      {ready && rows.length > 0 && (
+        <div className="hdi-map-legend">
+          {legendBadges.map((b) => (
+            <span key={b.label} className="hdi-map-legend-badge" style={{ background: `${b.color}22`, color: b.color }}>
+              <b>{b.label}</b> ({b.range})
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

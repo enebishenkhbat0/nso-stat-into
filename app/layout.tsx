@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata = {
-  title: "Үндэсний статистикийн хороо",
+  title: "NSO statcate intro dashboards",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

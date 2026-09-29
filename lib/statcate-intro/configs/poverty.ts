@@ -39,7 +39,7 @@ export const poverty: IntroDashboardConfig = {
       id: "adt",
       file: "DT_NSO_1900_010V1.px",
       label: { mn: "Амьжиргааны доод түвшин", en: "Minimum subsistence level" },
-      unit: { mn: "₮ / хүн / сар", en: "₮ / person / month" },
+      unit: { mn: "төг / хүн / сар", en: "MNT / person / month" },
       icon: "subsistence",
       format: "currency",
       geo: "Бүс",
@@ -60,7 +60,14 @@ export const poverty: IntroDashboardConfig = {
     {
       type: "region-map",
       table: "povertyMap",
-      layout: { legend: "horizontal" },
+      layout: {
+        legend: "horizontal",
+        aspectScale: 1.05,
+        left: 8,
+        right: 8,
+        top: 22,
+        bottom: 56,
+      },
     },
     {
       type: "region-bars",

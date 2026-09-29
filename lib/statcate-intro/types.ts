@@ -26,8 +26,14 @@ export type IntroIconName =
   | "sdg"
   | "child"
   | "elder"
-  | "male"
-  | "female"
+  | "handcuffs"
+  | "violentCrime"
+  | "theft"
+  | "fraud"
+  | "embezzlement"
+  | "robbery"
+  | "propertyCrime"
+  | "healthCrime"
   | "bop"
   | "cpi"
   | "environment"
@@ -77,40 +83,30 @@ export type IntroIconName =
 export type IntroValueFormat = "count" | "percent" | "decimal" | "currency";
 
 export type IntroTableConfig = {
-  /** Widget-үүд энэ id-аар хүснэгтийг заана. */
   id: string;
   file: string;
-  /** Нэмэлт PX файлууд — мөрийг нэгтгэнэ (ж: 1995–2020 + 2022). */
   files?: (string | { file: string; select: Record<string, string[]> })[];
-  /** PX дэд хавтас, ж: "INEQUALITY, Gini index, Theil index" */
   subtables?: string;
-  /** Өөр салбар/дэд салбараас татах (ж: ТХЗ → ядуурлын хүснэгт). */
   sourceSector?: string;
   sourceSubsector?: string;
   label: LocalizedText;
   icon?: IntroIconName;
   unit?: LocalizedText;
   format?: IntroValueFormat;
-  /** Энэ хүснэгтийн газар зүйн хэмжээс. Өгөөгүй бол config.dimensions.geo. */
   geo?: string;
-  /** national мөр байхгүй бол бүсийн дундаж. */
   nationalMode?: "code" | "average";
-  /** PX dimension code -> value codes. Өгөөгүй бол бүх утгыг авна. */
   select?: Record<string, string[]>;
-  /** Энэ хүснэгтийн цаг хугацааны хэмжээс. Өгөөгүй бол config.dimensions.time. */
   time?: string;
 };
 
 export type IntroDimensions = {
   time: string;
-  /** Шашин, хүйс, насны бүлэг гэх мэт задгай хэмжээс. */
   category?: string;
   geo?: string;
 };
 
 export type IntroGeoConfig = {
   nationalCode?: string;
-  /** Аймгийн графикаас хасах бүсийн код (Баруун бүс, Хангайн бүс, ...). */
   groupCodes?: string[];
 };
 
@@ -139,7 +135,6 @@ export type TrendWidget = {
   span?: IntroWidgetSpan;
   tables?: string[];
   title?: LocalizedText;
-  /** fromZero = тоо. nice = хувь/индекс, өгөгдлийн хүрээгээр. */
   yAxis?: TrendYAxisMode;
   height?: number;
 };
@@ -149,8 +144,12 @@ export type RegionBarsWidget = {
   span?: IntroWidgetSpan;
   table: string;
   title?: LocalizedText;
-  /** "aimags" = бүсийн группийг хасна. "all" = тухайн жилийн бүх газар. */
   geoMode?: "aimags" | "all";
+  /** When set, bars diverge left/right from this value instead of starting at 0
+   *  (e.g. 1.0 for a gender ratio where >1 means women outnumber men). */
+  balancePoint?: number;
+  lowLabel?: LocalizedText;
+  highLabel?: LocalizedText;
 };
 
 export type RegionMapLayout = {
@@ -186,13 +185,9 @@ export type CategoryStatsWidget = {
 
 export type CategoryBarsWidget = {
   type: "category-bars";
-  /** Fixed rows shared by paired charts; absent codes retain an empty row. */
   categories?: { code?: string; label: LocalizedText }[];
-  /** Show only the selected year when false (for one-off events such as runoffs). */
   fallbackYear?: boolean;
-  /** Override the dashboard palette for this chart. */
   color?: string;
-  /** Value bands: min inclusive, max exclusive; applied only to this widget. */
   valueColorBands?: { min?: number; max?: number; color: string }[];
   span?: IntroWidgetSpan;
   table: string;
@@ -201,9 +196,84 @@ export type CategoryBarsWidget = {
   labelMap?: Record<string, string>;
   height?: number;
   layout?: "vertical" | "horizontal";
-  /** Абсолют утгаараа эхний N мөр. */
   top?: number;
   totals?: string[];
+};
+
+export type HouseholdFlowWidget = {
+  type: "household-flow";
+  span?: IntroWidgetSpan;
+  incomeTables: string[];
+  expenseTables: string[];
+  totalIncomeTable: string;
+  totalExpenseTable: string;
+  icons?: Record<string, string>;
+};
+
+export type RatioGaugeWidget = {
+  type: "ratio-gauge";
+  span?: IntroWidgetSpan;
+  table: string;
+  min?: number;
+  max?: number;
+  balancePoint?: number;
+  lowLabel?: LocalizedText;
+  highLabel?: LocalizedText;
+};
+
+export type CategorySegmentsWidget = {
+  type: "category-segments";
+  span?: IntroWidgetSpan;
+  totalTable: string;
+  partsTable: string;
+  dimension: string;
+  title?: LocalizedText;
+  compareToPrevYear?: boolean;
+  labelMap?: Record<string, string>;
+};
+
+export type HdiKpisWidget = {
+  type: "hdi-kpis";
+  span?: IntroWidgetSpan;
+  scoreTable: string;
+  rankTable?: string;
+  geoDim?: string;
+};
+
+export type RegionRankingWidget = {
+  type: "region-ranking";
+  span?: IntroWidgetSpan;
+  table: string;
+  title?: LocalizedText;
+  bandLabels?: string[];
+};
+
+export type RegionDonutGridWidget = {
+  type: "region-donut-grid";
+  span?: IntroWidgetSpan;
+  table: string;
+  title?: LocalizedText;
+  subtitle?: LocalizedText;
+  colorLow?: string;
+  colorHigh?: string;
+};
+
+export type HouseholdSankeyWidget = {
+  type: "household-sankey";
+  span?: IntroWidgetSpan;
+  incomeTables: string[];
+  expenseTables: string[];
+  totalIncomeTable: string;
+  totalExpenseTable: string;
+};
+
+export type HouseholdDonutsWidget = {
+  type: "household-donuts";
+  span?: IntroWidgetSpan;
+  incomeParts: { table: string; label?: LocalizedText }[];
+  expenseParts: { table: string; label?: LocalizedText }[];
+  incomeTitle?: LocalizedText;
+  expenseTitle?: LocalizedText;
 };
 
 export type IntroWidget =
@@ -213,11 +283,18 @@ export type IntroWidget =
   | CategoryBarsWidget
   | TrendWidget
   | RegionBarsWidget
-  | RegionMapWidget;
+  | RegionMapWidget
+  | HouseholdFlowWidget
+  | RatioGaugeWidget
+  | CategorySegmentsWidget
+  | HdiKpisWidget
+  | RegionRankingWidget
+  | RegionDonutGridWidget
+  | HouseholdSankeyWidget
+  | HouseholdDonutsWidget;
 
 export type IntroDashboardConfig = {
   id: string;
-  /** PX folder id, e.g. "Monasteries, Temples and Churches" */
   subsector: string;
   title: LocalizedText;
   subtitle?: LocalizedText;
@@ -228,7 +305,6 @@ export type IntroDashboardConfig = {
   mapColors?: string[];
   sectionIcons?: { trend?: string; map?: string };
   tables: IntroTableConfig[];
-  /** Салбар бүрт өөр байж болно — ижил загварт шахах шаардлагагүй. */
   widgets: IntroWidget[];
 };
 
